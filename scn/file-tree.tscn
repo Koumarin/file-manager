@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Tree
+
+signal directory_selected(path)
+
+var directory := Directory.new()
+
+func _ready() -> void:
+	var item: TreeItem
+	
+	connect('item_activated', self, '_on_item_activated')
+	
+	item = create_item()
+	item.set_text(0, 'Filesystem')
+	item.set_selectable(0, false)
+	for i in range(directory.get_drive_count()):
+		item = create_item()
+		item.set_text(0, directory.get_drive(i))
+
+func _on_item_activated() -> void:
+	var selected_node = get_selected()
+	if null == selected_node:
+		return
+	emit_signal('directory_selected', selected_node.get_text(0) + '/')
+"
+
+[node name="FileTree" type="Tree"]
+margin_right = 253.0
+margin_bottom = 600.0
+mouse_filter = 1
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = SubResource( 2 )
