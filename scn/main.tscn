@@ -7,7 +7,7 @@ script/source = "extends Panel
 
 export (PackedScene) var Icon
 
-onready var icon_container := $IconContainer
+onready var icon_container := $ScrollContainer/GridContainer
 onready var directory      := Directory.new()
 
 func _ready() -> void:
@@ -25,6 +25,7 @@ func open_file(path: String, args := '') -> int:
 	print('Opening file: ', path)
 	return OK
 
+### Updates display with the current directory's files.
 func update() -> void:
 	var file := ''
 	
@@ -44,8 +45,19 @@ func update() -> void:
 		
 		file = directory.get_next()
 
+### Removes all icons currently displayed.
 func clear() -> void:
 	get_tree().call_group('Icons', 'queue_free')
+
+### We resize the icon container so that it has as many icons
+### as it can fit horizontally.
+func _resize_icon_container() -> void:
+	var icon_size: Vector2 = icon_container.get_child(1).rect_size
+	
+	if icon_container.rect_size.x + icon_size.x <= rect_size.x:
+		icon_container.columns += 1
+	elif icon_container.rect_size.x > rect_size.x:
+		icon_container.columns -= 1
 
 func _on_icon_opened(icon) -> void:
 	var path: String = icon.get_file_path()
@@ -56,6 +68,10 @@ func _on_icon_opened(icon) -> void:
 		change_directory(path)
 	else:
 		open_file(path)
+
+func _on_GridContainer_sort_children() -> void:
+	_resize_icon_container()
+
 "
 
 [node name="Main" type="Control"]
@@ -68,6 +84,10 @@ anchor_bottom = 1.0
 script = SubResource( 1 )
 Icon = ExtResource( 1 )
 
-[node name="IconContainer" type="GridContainer" parent="Panel"]
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+
+[node name="GridContainer" type="GridContainer" parent="Panel/ScrollContainer"]
+
+[connection signal="sort_children" from="Panel/ScrollContainer/GridContainer" to="Panel" method="_on_GridContainer_sort_children"]

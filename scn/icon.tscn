@@ -50,3 +50,4 @@ texture = ExtResource( 1 )
 margin_top = 68.0
 margin_right = 64.0
 margin_bottom = 82.0
+clip_text = true
