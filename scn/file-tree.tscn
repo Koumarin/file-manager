@@ -18,7 +18,7 @@ func _ready() -> void:
 	item.set_selectable(0, false)
 	
 	for i in range(directory.get_drive_count()):
-		var path := directory.get_drive(i)
+		var path := get_drive(i)
 		var subdirs: Array
 		
 		item = create_item()
@@ -33,6 +33,13 @@ func _ready() -> void:
 			subitem.set_text(0, translate_path_name(dir))
 			subitem.set_metadata(0, dir)
 			subitem.collapsed = true
+
+func get_drive(idx: int) -> String:
+	var path := directory.get_drive(idx)
+	
+	match OS.get_name():
+		'Windows': return path + '/'
+		_:         return path
 
 func get_subdirectories(path: String) -> Array:
 	var lst  := []
@@ -54,7 +61,14 @@ func translate_path_name(path: String) -> String:
 	match path:
 		'/':  return 'Root'
 		home: return 'Home'
-		_:    return strip_path(path)
+		_: if directory.dir_exists(path):
+				return path.get_base_dir()
+		else:
+				return path.get_basename()
+
+func get_basepath(path: String) -> String:
+	return (path.get_base_dir() if directory.dir_exists(path)
+			else path.get_basename())
 
 func get_username() -> String:
 	if OS.has_environment('USER'):
@@ -62,18 +76,15 @@ func get_username() -> String:
 	else:
 		return ''
 
-func strip_path(path: String) -> String:
-	return path.right(path.rfind('/') + 1)
-
 func cascade_tree(item: TreeItem) -> String:
 	if not item.get_metadata(0):
 		return ''
 	else:
-		return cascade_tree(item.get_parent()) + '/' + item.get_metadata(0)
+		return cascade_tree(item.get_parent()) + item.get_metadata(0)
 
 func _on_item_activated() -> void:
 	var selected_node = get_selected()
-	var path = selected_node.get_metadata(0) + '/'
+	var path = selected_node.get_metadata(0)
 	
 	if null == selected_node:
 		return
