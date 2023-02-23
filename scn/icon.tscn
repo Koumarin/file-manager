@@ -7,14 +7,24 @@ script/source = "extends VBoxContainer
 
 signal opened(file)
 
+var is_directory: bool = false
+
+var file_path := ''
+
 onready var label := $Label
 
-func set_text(s: String) -> void:
+func set_file_path(p: String) -> void:
+	file_path = p
+	## If our scene tree is not fully set up we wait
+	## until it's ready to set our icon label.
 	if not label:
 		yield(self, 'ready')
-	label.text = s
+	label.text = p
 
-func get_text() -> String:
+func get_file_path() -> String:
+	return file_path
+
+func get_label() -> String:
 	return label.text
 
 func _gui_input(event: InputEvent) -> void:

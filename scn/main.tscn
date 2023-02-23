@@ -8,33 +8,54 @@ script/source = "extends Panel
 export (PackedScene) var Icon
 
 onready var icon_container := $IconContainer
+onready var directory      := Directory.new()
 
 func _ready() -> void:
-	var directory := Directory.new()
-	var filename  := ''
-	
-	if directory.open(\"user://\") != OK:
+	if directory.open('/') != OK:
 		printerr('Can\\'t open directory!')
 		return
+	update()
+
+func change_directory(path: String) -> int:
+	var err := directory.change_dir(path)
+	update()
+	return err
+
+func open_file(path: String, args := '') -> int:
+	print('Opening file: ', path)
+	return OK
+
+func update() -> void:
+	var file := ''
+	
+	clear()
 	
 	directory.list_dir_begin()
-	filename = directory.get_next()
-	while '' != filename:
+	file = directory.get_next()
+	while '' != file:
 		var icon = Icon.instance()
 		
-		icon.set_text(filename)
+		if directory.current_is_dir():
+			icon.is_directory = true
+		icon.set_file_path(file)
 		icon.connect('opened', self, '_on_icon_opened')
+		icon.add_to_group('Icons')
 		icon_container.add_child(icon)
 		
-		if directory.current_is_dir():
-			print('Directory: ', filename)
-		else:
-			print('File: ', filename)
-		
-		filename = directory.get_next()
+		file = directory.get_next()
+
+func clear() -> void:
+	get_tree().call_group('Icons', 'queue_free')
 
 func _on_icon_opened(icon) -> void:
-	print('Double click on: ', icon.get_text())
+	var path: String = icon.get_file_path()
+	
+	print('opening ', path)
+	
+	if icon.is_directory:
+		change_directory(path)
+	else:
+		open_file(path)
 "
 
 [node name="Main" type="Control"]
