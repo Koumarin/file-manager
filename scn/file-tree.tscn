@@ -12,6 +12,7 @@ func _ready() -> void:
 	
 	connect('item_activated', self, '_on_item_activated')
 	
+	set_hide_root(true)
 	item = create_item()
 	item.set_text(0, 'Filesystem')
 	item.set_selectable(0, false)
@@ -84,3 +85,6 @@ mouse_filter = 1
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}

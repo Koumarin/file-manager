@@ -64,7 +64,6 @@ anchor_bottom = 0.0
 margin_left = 265.0
 margin_right = 1024.0
 margin_bottom = 600.0
-
 [connection signal="directory_changed" from="." to="Panel/HSplitContainer/IconContainer" method="_on_directory_changed"]
 [connection signal="directory_selected" from="Panel/HSplitContainer/FileTree" to="." method="_on_FileTree_directory_selected"]
 [connection signal="icon_opened" from="Panel/HSplitContainer/IconContainer" to="." method="_on_icon_opened"]
