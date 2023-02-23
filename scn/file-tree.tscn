@@ -18,10 +18,32 @@ func _ready() -> void:
 	
 	for i in range(directory.get_drive_count()):
 		var path := directory.get_drive(i)
+		var subdirs: Array
 		
 		item = create_item()
 		item.set_text(0, translate_path_name(path))
 		item.set_metadata(0, path)
+		
+		directory.open(path)
+		subdirs = get_subdirectories(directory)
+		
+		for dir in subdirs:
+			var subitem := create_item(item)
+			
+			subitem.set_text(0, translate_path_name(dir))
+			subitem.set_metadata(0, dir)
+
+func get_subdirectories(dir: Directory) -> Array:
+	var lst  := []
+	var file := ''
+	
+	dir.list_dir_begin(true, true)
+	file = dir.get_next()
+	while '' != file:
+		if dir.current_is_dir():
+			lst.append(file)
+		file = dir.get_next()
+	return lst
 
 func translate_path_name(path: String) -> String:
 	var username := get_username()
@@ -40,14 +62,19 @@ func get_username() -> String:
 func strip_path(path: String) -> String:
 	return path.right(path.rfind('/') + 1)
 
+func cascade_tree(item: TreeItem) -> String:
+	if not item.get_metadata(0):
+		return ''
+	else:
+		return cascade_tree(item.get_parent()) + '/' + item.get_metadata(0)
+
 func _on_item_activated() -> void:
 	var selected_node = get_selected()
 	var path = selected_node.get_metadata(0) + '/'
 	
 	if null == selected_node:
 		return
-	print(path)
-	emit_signal('directory_selected', path)
+	emit_signal('directory_selected', cascade_tree(selected_node))
 "
 
 [node name="FileTree" type="Tree"]
