@@ -1,0 +1,52 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://scn/icon.tscn" type="PackedScene" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Panel
+
+export (PackedScene) var Icon
+
+onready var icon_container := $IconContainer
+
+func _ready() -> void:
+	var directory := Directory.new()
+	var filename  := ''
+	
+	if directory.open(\"user://\") != OK:
+		printerr('Can\\'t open directory!')
+		return
+	
+	directory.list_dir_begin()
+	filename = directory.get_next()
+	while '' != filename:
+		var icon = Icon.instance()
+		
+		icon.set_text(filename)
+		icon.connect('opened', self, '_on_icon_opened')
+		icon_container.add_child(icon)
+		
+		if directory.current_is_dir():
+			print('Directory: ', filename)
+		else:
+			print('File: ', filename)
+		
+		filename = directory.get_next()
+
+func _on_icon_opened(icon) -> void:
+	print('Double click on: ', icon.get_text())
+"
+
+[node name="Main" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = SubResource( 1 )
+Icon = ExtResource( 1 )
+
+[node name="IconContainer" type="GridContainer" parent="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
