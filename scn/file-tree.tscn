@@ -24,20 +24,22 @@ func _ready() -> void:
 		item = create_item()
 		item.set_text(0, translate_path_name(path))
 		item.set_metadata(0, path)
+		item.collapsed = true
 		
-		directory.open(path)
-		subdirs = get_subdirectories(directory)
-		
+		subdirs = get_subdirectories(path)
 		for dir in subdirs:
 			var subitem := create_item(item)
 			
 			subitem.set_text(0, translate_path_name(dir))
 			subitem.set_metadata(0, dir)
+			subitem.collapsed = true
 
-func get_subdirectories(dir: Directory) -> Array:
+func get_subdirectories(path: String) -> Array:
 	var lst  := []
+	var dir  := Directory.new()
 	var file := ''
 	
+	dir.open(path)
 	dir.list_dir_begin(true, true)
 	file = dir.get_next()
 	while '' != file:
