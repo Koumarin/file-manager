@@ -2,7 +2,7 @@
 
 [ext_resource path="res://icon.png" type="Texture" id=1]
 
-[sub_resource type="GDScript" id=2]
+[sub_resource type="GDScript" id=1]
 script/source = "extends VBoxContainer
 
 signal opened(file)
@@ -35,7 +35,7 @@ func _gui_input(event: InputEvent) -> void:
 [node name="Icon" type="VBoxContainer"]
 margin_right = 64.0
 margin_bottom = 82.0
-script = SubResource( 2 )
+script = SubResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": true
 }
@@ -50,4 +50,5 @@ texture = ExtResource( 1 )
 margin_top = 68.0
 margin_right = 64.0
 margin_bottom = 82.0
+align = 1
 clip_text = true
