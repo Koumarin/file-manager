@@ -77,14 +77,11 @@ func get_username() -> String:
 		return ''
 
 func cascade_tree(item: TreeItem) -> String:
-	if not item.get_metadata(0):
-		return ''
-	else:
-		return cascade_tree(item.get_parent()) + item.get_metadata(0)
+	return ('' if not item.get_metadata(0)
+			else cascade_tree(item.get_parent()) + item.get_metadata(0))
 
 func _on_item_activated() -> void:
 	var selected_node = get_selected()
-	var path = selected_node.get_metadata(0)
 	
 	if null == selected_node:
 		return
