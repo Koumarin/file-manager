@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=2]
 
-[sub_resource type="GDScript" id=2]
+[sub_resource type="GDScript" id=1]
 script/source = "extends Tree
 
 signal directory_selected(path)
@@ -15,15 +15,39 @@ func _ready() -> void:
 	item = create_item()
 	item.set_text(0, 'Filesystem')
 	item.set_selectable(0, false)
+	
 	for i in range(directory.get_drive_count()):
+		var path := directory.get_drive(i)
+		
 		item = create_item()
-		item.set_text(0, directory.get_drive(i))
+		item.set_text(0, translate_path_name(path))
+		item.set_metadata(0, path)
+
+func translate_path_name(path: String) -> String:
+	var username := get_username()
+	var home     := '/home/' + username
+	match path:
+		'/':  return 'Root'
+		home: return 'Home'
+		_:    return strip_path(path)
+
+func get_username() -> String:
+	if OS.has_environment('USER'):
+		return OS.get_environment('USER')
+	else:
+		return ''
+
+func strip_path(path: String) -> String:
+	return path.right(path.rfind('/') + 1)
 
 func _on_item_activated() -> void:
 	var selected_node = get_selected()
+	var path = selected_node.get_metadata(0) + '/'
+	
 	if null == selected_node:
 		return
-	emit_signal('directory_selected', selected_node.get_text(0) + '/')
+	print(path)
+	emit_signal('directory_selected', path)
 "
 
 [node name="FileTree" type="Tree"]
@@ -32,4 +56,4 @@ margin_bottom = 600.0
 mouse_filter = 1
 size_flags_horizontal = 3
 size_flags_vertical = 3
-script = SubResource( 2 )
+script = SubResource( 1 )
