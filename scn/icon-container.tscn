@@ -34,7 +34,7 @@ func _on_directory_changed(directory: Directory) -> void:
 	
 	clear()
 	
-	directory.list_dir_begin()
+	directory.list_dir_begin(true, true)
 	file = directory.get_next()
 	while '' != file:
 		var icon = Icon.instance()
