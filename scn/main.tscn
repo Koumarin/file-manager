@@ -10,7 +10,7 @@ script/source = "extends Control
 signal directory_changed(directory)
 
 var _history     := []
-var _history_idx := -1
+var _history_idx := 0
 
 onready var directory := Directory.new()
 
@@ -19,20 +19,22 @@ func _ready() -> void:
 		printerr('Can\\'t open directory!')
 		return
 	OS.set_window_title(Util.get_relative_path(directory.get_current_dir()))
+	_history.append(directory.get_current_dir())
 	emit_signal('directory_changed', directory)
 
 func change_directory(path: String, write_history := true) -> int:
-	var err: int
+	var status: int
 	
-	if write_history:
-		_history = _history.slice(0, _history_idx)
-		_history_idx = -1
-		_history.append(directory.get_current_dir())
+	status = directory.change_dir(path)
+	if status == OK:
+		if write_history:
+			_history = _history.slice(0, _history_idx)
+			_history_idx += 1
+			_history.append(directory.get_current_dir())
+		OS.set_window_title(Util.get_relative_path(path))
+		emit_signal('directory_changed', directory)
 	print(_history)
-	err = directory.change_dir(path)
-	OS.set_window_title(Util.get_relative_path(path))
-	emit_signal('directory_changed', directory)
-	return err
+	return status
 
 func open_file(path: String, args := '') -> int:
 	print('Opening file: ', path)
@@ -51,22 +53,15 @@ func _on_icon_opened(icon) -> void:
 func _on_FileTree_directory_selected(path) -> void:
 	change_directory(path)
 
-### Dislike this, should always append history whenever a new directory
-### is entered, not before it's left. Then the history index should always
-### point to the current position we're in.
 func _on_TitleBar_back_selected() -> void:
 	if _history_idx == 0:
 		return
 	
-	if _history_idx == -1:
-		_history.append(directory.get_current_dir())
-		_history_idx = len(_history) - 2
-	else:
-		_history_idx -= 1
+	_history_idx -= 1
 	change_directory(_history[_history_idx], false)
 
 func _on_TitleBar_forward_selected() -> void:
-	if _history_idx == len(_history) - 1 or _history_idx == -1:
+	if _history_idx == len(_history) - 1:
 		return
 	
 	_history_idx += 1
