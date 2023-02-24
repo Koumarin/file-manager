@@ -6,8 +6,11 @@
 script/source = "extends ScrollContainer
 
 signal icon_opened(file)
+signal icon_selected(icon)
 
 export (PackedScene) var Icon
+
+var _selection = null
 
 onready var icon_container := $GridContainer
 
@@ -33,24 +36,42 @@ func _on_GridContainer_sort_children() -> void:
 func _on_directory_changed(directory: Directory) -> void:
 	var file := ''
 	
+	_deselect_current()
 	clear()
 	
 	directory.list_dir_begin(true, true)
 	file = directory.get_next()
 	while '' != file:
-		var icon = Icon.instance()
+		var is_dir := directory.current_is_dir()
 		
-		if directory.current_is_dir():
-			icon.is_directory = true
-		icon.set_file_path(file)
-		icon.connect('opened', self, '_on_icon_opened')
-		icon.add_to_group('Icons')
-		icon_container.add_child(icon)
-		
+		_create_icon(file, is_dir)
 		file = directory.get_next()
+
+func _create_icon(file: String, is_dir: bool) -> void:
+	var icon = Icon.instance()
+	
+	if is_dir:
+		icon.is_directory = true
+	
+	icon.set_file_path(file)
+	icon.connect('opened',   self, '_on_icon_opened')
+	icon.connect('selected', self, '_on_icon_selected')
+	icon.add_to_group('Icons')
+	icon_container.add_child(icon)
 
 func _on_icon_opened(icon) -> void:
 	emit_signal('icon_opened', icon)
+
+func _on_icon_selected(icon) -> void:
+	if _selection != icon:
+		_deselect_current()
+		_selection = icon
+		emit_signal('icon_selected', icon)
+
+func _deselect_current() -> void:
+	if _selection:
+		_selection.deselect()
+		_selection = null
 "
 
 [node name="IconContainer" type="ScrollContainer"]

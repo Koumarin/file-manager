@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://icon.png" type="Texture" id=1]
 
@@ -6,12 +6,16 @@
 script/source = "extends VBoxContainer
 
 signal opened(file)
+signal selected(file)
 
 var is_directory: bool = false
 
 var file_path := ''
 
-onready var label := $Label
+var _selected := false
+
+onready var label     := $Label
+onready var selection := $SelectionSprite
 
 func set_file_path(path: String) -> void:
 	## If our scene tree is not fully set up we wait
@@ -22,15 +26,30 @@ func set_file_path(path: String) -> void:
 	set_tooltip(path)
 
 func get_file_path() -> String:
-	return file_path
-
-func get_label() -> String:
 	return label.text
 
+func deselect() -> void:
+	_selected         = false
+	selection.visible = false
+
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.doubleclick:
-		emit_signal('opened', self)
+	if event is InputEventMouseButton:
+		if event.doubleclick:
+			emit_signal('opened', self)
+		elif not _selected and event.is_action_pressed('activate'):
+			_selected         = true
+			selection.visible = true
+			emit_signal('selected', self)
 "
+
+[sub_resource type="OpenSimplexNoise" id=2]
+octaves = 1
+
+[sub_resource type="NoiseTexture" id=3]
+width = 64
+height = 82
+bump_strength = 0.0
+noise = SubResource( 2 )
 
 [node name="Icon" type="VBoxContainer"]
 margin_right = 64.0
@@ -52,3 +71,9 @@ margin_right = 64.0
 margin_bottom = 82.0
 align = 1
 clip_text = true
+
+[node name="SelectionSprite" type="Sprite" parent="."]
+visible = false
+modulate = Color( 1, 1, 1, 0.501961 )
+texture = SubResource( 3 )
+centered = false
