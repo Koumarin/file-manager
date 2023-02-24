@@ -33,7 +33,6 @@ func change_directory(path: String, write_history := true) -> int:
 			_history.append(directory.get_current_dir())
 		OS.set_window_title(Util.get_relative_path(path))
 		emit_signal('directory_changed', directory)
-	print(_history)
 	return status
 
 func open_file(path: String, args := '') -> int:
@@ -42,8 +41,6 @@ func open_file(path: String, args := '') -> int:
 
 func _on_icon_opened(icon) -> void:
 	var path: String = icon.get_file_path()
-	
-	print('opening ', path)
 	
 	if icon.is_directory:
 		change_directory(path)

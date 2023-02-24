@@ -11,6 +11,7 @@ func _ready() -> void:
 	var item: TreeItem
 	
 	connect('item_activated', self, '_on_item_activated')
+	connect('item_collapsed', self, '_on_item_collapsed')
 	
 	set_hide_root(true)
 	item = create_item()
@@ -26,10 +27,20 @@ func _ready() -> void:
 		item.set_metadata(0, path)
 		item.collapsed = true
 		
-		subdirs = Util.get_subdirectories(path)
-		for dir in subdirs:
-			var subitem := create_item(item)
-			
+		update_subdirectories(item)
+
+func update_subdirectories(item: TreeItem) -> void:
+	var path: String = cascade_tree(item)
+	var subdirs     := Util.get_subdirectories(path)
+	
+	## If we just got here from a Tree signal, it's most likely that
+	## our tree is blocked and we can't add children, so we wait a
+	## frame until the tree unblocks.
+	yield(get_tree(), 'idle_frame')
+	for dir in subdirs:
+		var subitem := create_item(item)
+		
+		if subitem:
 			subitem.set_text(0, Util.translate_path_name(dir))
 			subitem.set_metadata(0, dir)
 			subitem.collapsed = true
@@ -42,8 +53,13 @@ func get_drive(idx: int) -> String:
 		_:         return path
 
 func cascade_tree(item: TreeItem) -> String:
-	return ('' if not item.get_metadata(0)
-			else cascade_tree(item.get_parent()) + item.get_metadata(0))
+	var path = item.get_metadata(0)
+	
+	if not path:
+		return ''
+	else:
+		var delim := '' if path.ends_with('/') else '/'
+		return cascade_tree(item.get_parent()) + delim + item.get_metadata(0)
 
 func _on_item_activated() -> void:
 	var selected_node = get_selected()
@@ -51,6 +67,17 @@ func _on_item_activated() -> void:
 	if null == selected_node:
 		return
 	emit_signal('directory_selected', cascade_tree(selected_node))
+
+### This triggers both when an item collapses and when it's uncollapsed.
+func _on_item_collapsed (item: TreeItem) -> void:
+	if not item.collapsed:
+		var path: String = item.get_metadata(0)
+		var i:    TreeItem
+		
+		i = item.get_children()
+		while i:
+			update_subdirectories(i)
+			i = i.get_next()
 "
 
 [node name="FileTree" type="Tree"]
