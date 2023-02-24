@@ -13,13 +13,13 @@ var file_path := ''
 
 onready var label := $Label
 
-func set_file_path(p: String) -> void:
-	file_path = p
+func set_file_path(path: String) -> void:
 	## If our scene tree is not fully set up we wait
 	## until it's ready to set our icon label.
 	if not label:
 		yield(self, 'ready')
-	label.text = p
+	label.text = path
+	set_tooltip(path)
 
 func get_file_path() -> String:
 	return file_path
