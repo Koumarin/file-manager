@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://scn/icon-container.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scn/file-tree.tscn" type="PackedScene" id=2]
 [ext_resource path="res://scn/title-bar.tscn" type="PackedScene" id=3]
+[ext_resource path="res://dat/theme/default.tres" type="Theme" id=4]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
@@ -68,6 +69,7 @@ func _on_TitleBar_forward_selected() -> void:
 [node name="Main" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+theme = ExtResource( 4 )
 script = SubResource( 1 )
 
 [node name="Panel" type="Panel" parent="."]
@@ -85,7 +87,7 @@ size_flags_vertical = 3
 [node name="TitleBar" parent="Panel/VBoxContainer" instance=ExtResource( 3 )]
 
 [node name="HSplitContainer" type="HSplitContainer" parent="Panel/VBoxContainer"]
-margin_top = 52.0
+margin_top = 48.0
 margin_right = 1024.0
 margin_bottom = 600.0
 mouse_filter = 1
@@ -94,14 +96,14 @@ size_flags_vertical = 3
 split_offset = -253
 
 [node name="FileTree" parent="Panel/VBoxContainer/HSplitContainer" instance=ExtResource( 2 )]
-margin_bottom = 548.0
+margin_bottom = 552.0
 
 [node name="IconContainer" parent="Panel/VBoxContainer/HSplitContainer" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_left = 265.0
 margin_right = 1024.0
-margin_bottom = 548.0
+margin_bottom = 552.0
 
 [connection signal="directory_changed" from="." to="Panel/VBoxContainer/TitleBar" method="_on_directory_changed"]
 [connection signal="directory_changed" from="." to="Panel/VBoxContainer/HSplitContainer/IconContainer" method="_on_directory_changed"]
