@@ -18,6 +18,7 @@ func _ready() -> void:
 	if directory.open('/') != OK:
 		printerr('Can\\'t open directory!')
 		return
+	OS.set_window_title(Util.get_relative_path(directory.get_current_dir()))
 	emit_signal('directory_changed', directory)
 
 func change_directory(path: String, write_history := true) -> int:
@@ -29,6 +30,7 @@ func change_directory(path: String, write_history := true) -> int:
 		_history.append(directory.get_current_dir())
 	print(_history)
 	err = directory.change_dir(path)
+	OS.set_window_title(Util.get_relative_path(path))
 	emit_signal('directory_changed', directory)
 	return err
 
@@ -109,6 +111,7 @@ margin_left = 265.0
 margin_right = 1024.0
 margin_bottom = 548.0
 
+[connection signal="directory_changed" from="." to="Panel/VBoxContainer/TitleBar" method="_on_directory_changed"]
 [connection signal="directory_changed" from="." to="Panel/VBoxContainer/HSplitContainer/IconContainer" method="_on_directory_changed"]
 [connection signal="back_selected" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_back_selected"]
 [connection signal="forward_selected" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_forward_selected"]

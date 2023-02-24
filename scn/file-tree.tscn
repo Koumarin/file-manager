@@ -22,15 +22,15 @@ func _ready() -> void:
 		var subdirs: Array
 		
 		item = create_item()
-		item.set_text(0, translate_path_name(path))
+		item.set_text(0, Util.translate_path_name(path))
 		item.set_metadata(0, path)
 		item.collapsed = true
 		
-		subdirs = get_subdirectories(path)
+		subdirs = Util.get_subdirectories(path)
 		for dir in subdirs:
 			var subitem := create_item(item)
 			
-			subitem.set_text(0, translate_path_name(dir))
+			subitem.set_text(0, Util.translate_path_name(dir))
 			subitem.set_metadata(0, dir)
 			subitem.collapsed = true
 
@@ -40,41 +40,6 @@ func get_drive(idx: int) -> String:
 	match OS.get_name():
 		'Windows': return path + '/'
 		_:         return path
-
-func get_subdirectories(path: String) -> Array:
-	var lst  := []
-	var dir  := Directory.new()
-	var file := ''
-	
-	dir.open(path)
-	dir.list_dir_begin(true, true)
-	file = dir.get_next()
-	while '' != file:
-		if dir.current_is_dir():
-			lst.append(file)
-		file = dir.get_next()
-	return lst
-
-func translate_path_name(path: String) -> String:
-	var username := get_username()
-	var home     := '/home/' + username
-	match path:
-		'/':  return 'Root'
-		home: return 'Home'
-		_: if directory.dir_exists(path):
-				return path.get_base_dir()
-		else:
-				return path.get_basename()
-
-func get_basepath(path: String) -> String:
-	return (path.get_base_dir() if directory.dir_exists(path)
-			else path.get_basename())
-
-func get_username() -> String:
-	if OS.has_environment('USER'):
-		return OS.get_environment('USER')
-	else:
-		return ''
 
 func cascade_tree(item: TreeItem) -> String:
 	return ('' if not item.get_metadata(0)
