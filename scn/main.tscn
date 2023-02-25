@@ -64,6 +64,9 @@ func _on_TitleBar_forward_selected() -> void:
 	
 	_history_idx += 1
 	change_directory(_history[_history_idx], false)
+
+func _on_TitleBar_path_entered(path: String):
+	change_directory(path)
 "
 
 [node name="Main" type="Control"]
@@ -109,5 +112,6 @@ margin_bottom = 552.0
 [connection signal="directory_changed" from="." to="Panel/VBoxContainer/HSplitContainer/IconContainer" method="_on_directory_changed"]
 [connection signal="back_selected" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_back_selected"]
 [connection signal="forward_selected" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_forward_selected"]
+[connection signal="path_entered" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_path_entered"]
 [connection signal="directory_selected" from="Panel/VBoxContainer/HSplitContainer/FileTree" to="." method="_on_FileTree_directory_selected"]
 [connection signal="icon_opened" from="Panel/VBoxContainer/HSplitContainer/IconContainer" to="." method="_on_icon_opened"]

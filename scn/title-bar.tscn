@@ -9,8 +9,9 @@ script/source = "extends HBoxContainer
 
 signal back_selected
 signal forward_selected
+signal path_entered(path)
 
-onready var title_label := $LeftContainer/Title
+onready var path := $'%PathInput'
 
 func _on_ButtonBack_button_up() -> void:
 	emit_signal('back_selected')
@@ -21,7 +22,10 @@ func _on_ButtonForward_button_up() -> void:
 func _on_directory_changed(directory: Directory) -> void:
 	var curdir := directory.get_current_dir()
 	
-	title_label.text = curdir
+	path.text = curdir
+
+func _on_PathInput_text_entered(new_path):
+	emit_signal('path_entered', new_path)
 "
 
 [node name="TitleBar" type="HBoxContainer"]
@@ -47,12 +51,15 @@ margin_bottom = 48.0
 texture_normal = ExtResource( 2 )
 flip_h = true
 
-[node name="Title" type="Label" parent="LeftContainer"]
+[node name="PathInput" type="LineEdit" parent="LeftContainer"]
+unique_name_in_owner = true
 margin_left = 104.0
-margin_top = 17.0
-margin_right = 150.0
-margin_bottom = 31.0
+margin_right = 510.0
+margin_bottom = 48.0
+size_flags_horizontal = 3
 text = "Testing"
+expand_to_text_length = true
+placeholder_text = "Path"
 
 [node name="RightContainer" type="HBoxContainer" parent="."]
 margin_left = 514.0
@@ -75,3 +82,4 @@ texture_normal = ExtResource( 3 )
 
 [connection signal="button_up" from="LeftContainer/ButtonBack" to="." method="_on_ButtonBack_button_up"]
 [connection signal="button_up" from="LeftContainer/ButtonForward" to="." method="_on_ButtonForward_button_up"]
+[connection signal="text_entered" from="LeftContainer/PathInput" to="." method="_on_PathInput_text_entered"]
