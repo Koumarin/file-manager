@@ -23,15 +23,24 @@ func _ready() -> void:
 		item.disable_folding = true
 	
 	## Filesystem root.
-	root = create_item(root)
-	root.set_text(0, 'Filesystem')
-	root.set_selectable(0, false)
-	
-	for i in range(directory.get_drive_count()):
-		var path := get_drive(i)
-		var dir  := add_directory(root, path)
+	if OS.get_name() == 'Windows':
+		root = create_item(root)
+		root.set_text(0, 'Filesystem')
+		root.set_selectable(0, false)
 		
-		update_subdirectories(dir)
+		for i in range(directory.get_drive_count()):
+			var path := get_drive(i)
+			var dir  := add_directory(root, path)
+			
+			update_subdirectories(dir)
+	else:
+		root = create_item(root)
+		root.set_text(0, 'Filesystem')
+		root.set_metadata(0, '/')
+		root.set_selectable(0, true)
+		root.collapsed = true
+		
+		update_subdirectories(root)
 
 func update_subdirectories(root: TreeItem) -> void:
 	var path: String = cascade_tree(root)
@@ -77,11 +86,11 @@ func cascade_tree(item: TreeItem) -> String:
 	
 	if not item.get_parent().get_metadata(0):
 		return path
-	elif not path:
+	elif not path or path == '/':
 		return ''
 	else:
 		var delim := '' if path.ends_with('/') else '/'
-		return cascade_tree(item.get_parent()) + delim + item.get_metadata(0)
+		return cascade_tree(item.get_parent()) + item.get_metadata(0) + delim
 
 func _on_item_activated() -> void:
 	var selected_node = get_selected()
