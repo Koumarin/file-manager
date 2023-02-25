@@ -16,11 +16,20 @@ var _history_idx := 0
 onready var directory := Directory.new()
 
 func _ready() -> void:
-	if directory.open('/') != OK:
-		printerr('Can\\'t open directory!')
+	var init_dir: String
+	
+	if OS.get_name() == 'Windows':
+		init_dir = 'C:/'
+	else:
+		init_dir = '/home/' + Util.get_username()
+	
+	if directory.open(init_dir) != OK:
+		printerr('Can\\'t open directory ', init_dir, '.')
 		return
+	
 	OS.set_window_title(Util.get_relative_path(directory.get_current_dir()))
 	_history.append(directory.get_current_dir())
+	
 	emit_signal('directory_changed', directory)
 
 func change_directory(path: String, write_history := true) -> int:
