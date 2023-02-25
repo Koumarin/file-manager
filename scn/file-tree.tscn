@@ -74,10 +74,16 @@ func get_drive(idx: int) -> String:
 func get_system_dirs() -> Array:
 	var dirs := []
 	
-	for i in range(OS.SYSTEM_DIR_RINGTONES + 1):
-		var path := OS.get_system_dir(i)
-		if not dirs.has(path):
-			dirs.append(path)
+	if OS.get_name() == 'Windows':
+		for i in range(OS.SYSTEM_DIR_RINGTONES + 1):
+			var path := OS.get_system_dir(i)
+			if not dirs.has(path):
+				dirs.append(path)
+	elif OS.get_name() == 'X11':
+		for i in range(directory.get_drive_count()):
+			var path := directory.get_drive(i)
+			if not path == '/' and not path == '/home':
+				dirs.append(path)
 	
 	return dirs
 
