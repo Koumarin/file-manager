@@ -8,29 +8,24 @@ signal directory_selected(path)
 var directory := Directory.new()
 
 func _ready() -> void:
-	var item: TreeItem
+	var root: TreeItem
 	
 	connect('item_activated', self, '_on_item_activated')
 	connect('item_collapsed', self, '_on_item_collapsed')
 	
-	set_hide_root(true)
-	item = create_item()
-	item.set_text(0, 'Filesystem')
-	item.set_selectable(0, false)
+	set_hide_root(false)
+	root = create_item()
+	root.set_text(0, 'Filesystem')
+	root.set_selectable(0, false)
 	
 	for i in range(directory.get_drive_count()):
 		var path := get_drive(i)
-		var subdirs: Array
+		var dir  := add_directory(root, path)
 		
-		item = create_item()
-		item.set_text(0, Util.translate_path_name(path))
-		item.set_metadata(0, path)
-		item.collapsed = true
-		
-		update_subdirectories(item)
+		update_subdirectories(dir)
 
-func update_subdirectories(item: TreeItem) -> void:
-	var path: String = cascade_tree(item)
+func update_subdirectories(root: TreeItem) -> void:
+	var path: String = cascade_tree(root)
 	var subdirs     := Util.get_subdirectories(path)
 	
 	## If we just got here from a Tree signal, it's most likely that
@@ -38,12 +33,18 @@ func update_subdirectories(item: TreeItem) -> void:
 	## frame until the tree unblocks.
 	yield(get_tree(), 'idle_frame')
 	for dir in subdirs:
-		var subitem := create_item(item)
-		
-		if subitem:
-			subitem.set_text(0, Util.translate_path_name(dir))
-			subitem.set_metadata(0, dir)
-			subitem.collapsed = true
+		add_directory(root, dir)
+
+func add_directory(root: TreeItem, path: String) -> TreeItem:
+	var item: TreeItem
+	
+	item = create_item(root)
+	if item:
+		item.set_text(0, Util.translate_path_name(path))
+		item.set_metadata(0, path)
+		item.collapsed = true
+		return item
+	return null
 
 func get_drive(idx: int) -> String:
 	var path := directory.get_drive(idx)
@@ -70,7 +71,7 @@ func _on_item_activated() -> void:
 
 ### This triggers both when an item collapses and when it's uncollapsed.
 func _on_item_collapsed (item: TreeItem) -> void:
-	if not item.collapsed:
+	if not item.collapsed and item.get_parent():
 		var path: String = item.get_metadata(0)
 		var i:    TreeItem
 		
