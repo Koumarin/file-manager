@@ -24,6 +24,12 @@ func translate_path_name(path: String) -> String:
 		home: return 'Home'
 		_:    return get_relative_path(path)
 
+func get_absolute_path(dir: Directory, path: String) -> String:
+	if path.is_rel_path():
+		return dir.get_current_dir().trim_suffix('/') + '/' + path
+	else:
+		return path
+
 func get_relative_path(path: String) -> String:
 	path = path.get_basename().trim_suffix('/')
 	return path.substr(path.rfind('/') + 1)

@@ -36,9 +36,8 @@ func change_directory(path: String, write_history := true) -> int:
 		emit_signal('directory_changed', directory)
 	return status
 
-func open_file(path: String, args := '') -> int:
-	print('Opening file: ', path)
-	return OK
+func open_file(path: String, args: PoolStringArray = []) -> int:
+	return OS.execute(path, args, false)
 
 func _on_icon_opened(icon) -> void:
 	var path: String = icon.get_file_path()
@@ -46,7 +45,8 @@ func _on_icon_opened(icon) -> void:
 	if icon.is_directory:
 		change_directory(path)
 	else:
-		open_file(path)
+		print(Util.get_absolute_path(directory, path))
+		open_file(Util.get_absolute_path(directory, path))
 
 func _on_FileTree_directory_selected(path) -> void:
 	change_directory(path)
