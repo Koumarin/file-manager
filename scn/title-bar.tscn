@@ -19,9 +19,9 @@ func _on_ButtonForward_button_up() -> void:
 	emit_signal('forward_selected')
 
 func _on_directory_changed(directory: Directory) -> void:
-	var title := Util.get_relative_path(directory.get_current_dir())
+	var curdir := directory.get_current_dir()
 	
-	title_label.text = title
+	title_label.text = curdir
 "
 
 [node name="TitleBar" type="HBoxContainer"]
