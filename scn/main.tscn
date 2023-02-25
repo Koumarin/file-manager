@@ -49,6 +49,7 @@ func _on_icon_opened(icon) -> void:
 		open_file(Util.get_absolute_path(directory, path))
 
 func _on_FileTree_directory_selected(path) -> void:
+	print(path)
 	change_directory(path)
 
 func _on_TitleBar_back_selected() -> void:

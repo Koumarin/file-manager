@@ -13,8 +13,17 @@ func _ready() -> void:
 	connect('item_activated', self, '_on_item_activated')
 	connect('item_collapsed', self, '_on_item_collapsed')
 	
-	set_hide_root(false)
+	## Tree root.
+	set_hide_root(true)
 	root = create_item()
+	root.set_selectable(0, false)
+	
+	for dir in get_system_dirs():
+		var item := add_directory(root, dir)
+		item.disable_folding = true
+	
+	## Filesystem root.
+	root = create_item(root)
 	root.set_text(0, 'Filesystem')
 	root.set_selectable(0, false)
 	
@@ -53,10 +62,22 @@ func get_drive(idx: int) -> String:
 		'Windows': return path + '/'
 		_:         return path
 
+func get_system_dirs() -> Array:
+	var dirs := []
+	
+	for i in range(OS.SYSTEM_DIR_RINGTONES + 1):
+		var path := OS.get_system_dir(i)
+		if not dirs.has(path):
+			dirs.append(path)
+	
+	return dirs
+
 func cascade_tree(item: TreeItem) -> String:
 	var path = item.get_metadata(0)
 	
-	if not path:
+	if not item.get_parent().get_metadata(0):
+		return path
+	elif not path:
 		return ''
 	else:
 		var delim := '' if path.ends_with('/') else '/'
@@ -71,7 +92,7 @@ func _on_item_activated() -> void:
 
 ### This triggers both when an item collapses and when it's uncollapsed.
 func _on_item_collapsed (item: TreeItem) -> void:
-	if not item.collapsed and item.get_parent():
+	if not item.collapsed and item.get_metadata(0):
 		var path: String = item.get_metadata(0)
 		var i:    TreeItem
 		
