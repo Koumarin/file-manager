@@ -12,7 +12,31 @@ export (PackedScene) var Icon
 
 var _selection = null
 
+var _path        := '/'
+var _skip_hidden := true
+
 onready var icon_container := $GridContainer
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_released('toggle-hidden'):
+		_skip_hidden = not _skip_hidden
+		update_icons()
+
+func update_icons() -> void:
+	var file := ''
+	var dir  := Directory.new()
+	
+	_deselect_current()
+	clear()
+	
+	dir.open(_path)
+	dir.list_dir_begin(true, _skip_hidden)
+	file = dir.get_next()
+	while '' != file:
+		var is_dir := dir.current_is_dir()
+		
+		_create_icon(file, is_dir)
+		file = dir.get_next()
 
 ### Removes all icons currently displayed.
 func clear() -> void:
@@ -33,19 +57,9 @@ func _on_GridContainer_sort_children() -> void:
 	_resize_icon_container()
 
 ### Updates display with the current directory's files.
-func _on_directory_changed(directory: Directory) -> void:
-	var file := ''
-	
-	_deselect_current()
-	clear()
-	
-	directory.list_dir_begin(true, true)
-	file = directory.get_next()
-	while '' != file:
-		var is_dir := directory.current_is_dir()
-		
-		_create_icon(file, is_dir)
-		file = directory.get_next()
+func _on_directory_changed(dir: Directory) -> void:
+	_path = dir.get_current_dir()
+	update_icons()
 
 func _create_icon(file: String, is_dir: bool) -> void:
 	var icon = Icon.instance()
