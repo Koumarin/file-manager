@@ -113,7 +113,8 @@ func _on_item_collapsed (item: TreeItem) -> void:
 		
 		i = item.get_children()
 		while i:
-			update_subdirectories(i)
+			if not i.get_children():
+				update_subdirectories(i)
 			i = i.get_next()
 "
 
