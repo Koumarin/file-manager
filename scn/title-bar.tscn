@@ -1,23 +1,25 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://dat/icon/search.svg" type="Texture" id=1]
 [ext_resource path="res://dat/icon/chevron.svg" type="Texture" id=2]
 [ext_resource path="res://dat/icon/menu.svg" type="Texture" id=3]
+[ext_resource path="res://dat/icon/dropdown.svg" type="Texture" id=4]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends HBoxContainer
 
-signal back_selected
-signal forward_selected
-signal path_entered(path)
+signal back_select
+signal forward_select
+signal history_select
+signal path_enter(path)
 
 onready var path := $'%PathInput'
 
 func _on_ButtonBack_button_up() -> void:
-	emit_signal('back_selected')
+	emit_signal('back_select')
 
 func _on_ButtonForward_button_up() -> void:
-	emit_signal('forward_selected')
+	emit_signal('forward_select')
 
 func _on_directory_changed(directory: Directory) -> void:
 	var curdir := directory.get_current_dir()
@@ -25,7 +27,10 @@ func _on_directory_changed(directory: Directory) -> void:
 	path.text = curdir
 
 func _on_PathInput_text_entered(new_path):
-	emit_signal('path_entered', new_path)
+	emit_signal('path_enter', new_path)
+
+func _on_ButtonHistory_button_up() -> void:
+	emit_signal('history_select')
 "
 
 [node name="TitleBar" type="HBoxContainer"]
@@ -51,9 +56,15 @@ margin_bottom = 48.0
 texture_normal = ExtResource( 2 )
 flip_h = true
 
+[node name="ButtonHistory" type="TextureButton" parent="LeftContainer"]
+margin_left = 104.0
+margin_right = 152.0
+margin_bottom = 48.0
+texture_normal = ExtResource( 4 )
+
 [node name="PathInput" type="LineEdit" parent="LeftContainer"]
 unique_name_in_owner = true
-margin_left = 104.0
+margin_left = 156.0
 margin_right = 510.0
 margin_bottom = 48.0
 size_flags_horizontal = 3
@@ -82,4 +93,5 @@ texture_normal = ExtResource( 3 )
 
 [connection signal="button_up" from="LeftContainer/ButtonBack" to="." method="_on_ButtonBack_button_up"]
 [connection signal="button_up" from="LeftContainer/ButtonForward" to="." method="_on_ButtonForward_button_up"]
+[connection signal="button_up" from="LeftContainer/ButtonHistory" to="." method="_on_ButtonHistory_button_up"]
 [connection signal="text_entered" from="LeftContainer/PathInput" to="." method="_on_PathInput_text_entered"]

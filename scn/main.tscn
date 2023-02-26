@@ -13,7 +13,8 @@ signal directory_changed(directory)
 var _history     := []
 var _history_idx := 0
 
-onready var directory := Directory.new()
+onready var directory     := Directory.new()
+onready var history_popup := $HistoryPopup
 
 func _ready() -> void:
 	var init_dir: String
@@ -34,6 +35,9 @@ func _ready() -> void:
 
 func change_directory(path: String, write_history := true) -> int:
 	var status: int
+	
+	if path == directory.get_current_dir():
+		return OK
 	
 	status = directory.change_dir(path)
 	if status == OK:
@@ -77,6 +81,27 @@ func _on_TitleBar_forward_selected() -> void:
 
 func _on_TitleBar_path_entered(path: String):
 	change_directory(path)
+
+func _on_TitleBar_history_selected() -> void:
+	if not history_popup.visible:
+		history_popup.clear()
+		for i in range(len(_history)):
+			var path = _history[i]
+			var text = Util.get_relative_path(path)
+			
+			if i == _history_idx:
+				text = '> ' + text
+			
+			history_popup.add_item(text)
+			history_popup.set_item_metadata(i, path)
+		history_popup.show()
+	else:
+		history_popup.hide()
+		history_popup.clear()
+
+func _on_HistoryPopup_index_pressed(index: int) -> void:
+	_history_idx = index
+	change_directory(history_popup.get_item_metadata(index), false)
 "
 
 [node name="Main" type="Control"]
@@ -118,10 +143,21 @@ margin_left = 265.0
 margin_right = 1024.0
 margin_bottom = 552.0
 
+[node name="HistoryPopup" type="PopupMenu" parent="."]
+anchor_left = 0.102
+anchor_top = 0.08
+anchor_right = 0.121
+anchor_bottom = 0.113
+margin_left = -0.448006
+margin_right = 0.095993
+margin_bottom = 0.199997
+
 [connection signal="directory_changed" from="." to="Panel/VBoxContainer/TitleBar" method="_on_directory_changed"]
 [connection signal="directory_changed" from="." to="Panel/VBoxContainer/HSplitContainer/IconContainer" method="_on_directory_changed"]
-[connection signal="back_selected" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_back_selected"]
-[connection signal="forward_selected" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_forward_selected"]
-[connection signal="path_entered" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_path_entered"]
+[connection signal="back_select" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_back_selected"]
+[connection signal="forward_select" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_forward_selected"]
+[connection signal="history_select" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_history_selected"]
+[connection signal="path_enter" from="Panel/VBoxContainer/TitleBar" to="." method="_on_TitleBar_path_entered"]
 [connection signal="directory_selected" from="Panel/VBoxContainer/HSplitContainer/FileTree" to="." method="_on_FileTree_directory_selected"]
 [connection signal="icon_opened" from="Panel/VBoxContainer/HSplitContainer/IconContainer" to="." method="_on_icon_opened"]
+[connection signal="index_pressed" from="HistoryPopup" to="." method="_on_HistoryPopup_index_pressed"]
