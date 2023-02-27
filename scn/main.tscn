@@ -50,7 +50,11 @@ func change_directory(path: String, write_history := true) -> int:
 	return status
 
 func open_file(path: String, args: PoolStringArray = []) -> int:
-	return OS.execute(path, args, false)
+	var status := OS.shell_open(path)
+	
+	if status != OK:
+		OS.execute(path, args, false)
+	return status
 
 func _on_icon_opened(icon) -> void:
 	var path: String = icon.get_file_path()
