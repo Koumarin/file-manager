@@ -10,7 +10,10 @@ signal icon_selected(icon)
 
 export (PackedScene) var Icon
 
-var _selection = null
+var _selection := []
+
+var _multi_select := false
+var _ctrl_select  := false
 
 var _path        := '/'
 var _skip_hidden := true
@@ -18,6 +21,10 @@ var _skip_hidden := true
 onready var icon_container := $GridContainer
 
 func _unhandled_input(event: InputEvent) -> void:
+	## Give shift-select precedence over control
+	_multi_select = event.get_action_strength('multi-select')
+	if not _multi_select:
+		_ctrl_select = event.get_action_strength('control-select')
 	if event.is_action_released('toggle-hidden'):
 		_skip_hidden = not _skip_hidden
 		update_icons()
@@ -26,7 +33,7 @@ func update_icons() -> void:
 	var file := ''
 	var dir  := Directory.new()
 	
-	_deselect_current()
+	_deselect_all()
 	clear()
 	
 	dir.open(_path)
@@ -77,15 +84,63 @@ func _on_icon_opened(icon) -> void:
 	emit_signal('icon_opened', icon)
 
 func _on_icon_selected(icon) -> void:
-	if _selection != icon:
-		_deselect_current()
-		_selection = icon
-		emit_signal('icon_selected', icon)
+	## Shift selection.
+	if _multi_select:
+		var first
+		var pos: int
+		var dir: int
+		var children := _get_all_icons()
+		
+		## We get the icon that started our selection.
+		if _selection.empty():
+			first = get_child(0)
+		else:
+			first = _selection[0]
+		## Our initial icon was clicked, so we just ignore.
+		if first == icon:
+			return
+		## We deselect all icons beside our first one.
+		for i in children:
+			if not i == first:
+				_deselect(i)
+		
+		pos = children.find(first)
+		## If our initial icon is after our newly selected one,
+		## we need to go backwards.
+		dir = -1 if children.find(icon) < pos else 1
+		
+		for i in range(pos, children.find(icon) + dir, dir):
+			var x = children[i]
+			
+			x.select()
+			_selection.append(x)
+	## Control selection.
+	elif _ctrl_select:
+		if _selection.has(icon):
+			_deselect(icon)
+		else:
+			_selection.append(icon)
+			emit_signal('icon_selected', icon)
+	## Single selection.
+	else:
+		if not _selection.has(icon):
+			_deselect_all()
+			_selection = [icon]
+			emit_signal('icon_selected', icon)
 
-func _deselect_current() -> void:
+func _get_all_icons() -> Array:
+	return icon_container.get_children()
+
+func _deselect(icon) -> void:
+	if _selection.has(icon):
+		icon.deselect()
+		_selection.erase(icon)
+
+func _deselect_all() -> void:
 	if _selection:
-		_selection.deselect()
-		_selection = null
+		for i in _selection:
+			i.deselect()
+		_selection = []
 "
 
 [node name="IconContainer" type="ScrollContainer"]

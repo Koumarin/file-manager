@@ -23,6 +23,23 @@ func _ready() -> void:
 	yield(get_tree(), 'idle_frame')
 	_origin_pos = rect_position
 
+func _gui_input(event: InputEvent) -> void:
+	var mouse_pos := get_global_mouse_position()
+	if event is InputEventMouseButton:
+		if event.doubleclick:
+			emit_signal('opened', self)
+		elif not _selected and event.is_action_pressed('activate'):
+			_last_mouse_pos   = mouse_pos
+			_dragging         = true
+			select()
+			emit_signal('selected', self)
+		elif event.is_action_released('activate'):
+			_dragging     = false
+			rect_position = _origin_pos
+	elif event is InputEventMouseMotion and _dragging:
+		rect_position  += mouse_pos - _last_mouse_pos
+		_last_mouse_pos = mouse_pos
+
 func set_file_path(path: String) -> void:
 	## If our scene tree is not fully set up we wait
 	## until it's ready to set our icon label.
@@ -34,27 +51,13 @@ func set_file_path(path: String) -> void:
 func get_file_path() -> String:
 	return label.text
 
+func select() -> void:
+	_selected         = true
+	selection.visible = true
+
 func deselect() -> void:
 	_selected         = false
 	selection.visible = false
-
-func _gui_input(event: InputEvent) -> void:
-	var mouse_pos := get_global_mouse_position()
-	if event is InputEventMouseButton:
-		if event.doubleclick:
-			emit_signal('opened', self)
-		elif not _selected and event.is_action_pressed('activate'):
-			_last_mouse_pos   = mouse_pos
-			_dragging         = true
-			_selected         = true
-			selection.visible = true
-			emit_signal('selected', self)
-		elif event.is_action_released('activate'):
-			_dragging     = false
-			rect_position = _origin_pos
-	elif event is InputEventMouseMotion and _dragging:
-		rect_position  += mouse_pos - _last_mouse_pos
-		_last_mouse_pos = mouse_pos
 "
 
 [sub_resource type="OpenSimplexNoise" id=2]
