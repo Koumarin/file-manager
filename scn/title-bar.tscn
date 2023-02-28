@@ -1,11 +1,11 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=6 format=3 uid="uid://dj05xf6hpqn4i"]
 
-[ext_resource path="res://dat/icon/search.svg" type="Texture" id=1]
-[ext_resource path="res://dat/icon/chevron.svg" type="Texture" id=2]
-[ext_resource path="res://dat/icon/menu.svg" type="Texture" id=3]
-[ext_resource path="res://dat/icon/dropdown.svg" type="Texture" id=4]
+[ext_resource type="Texture2D" uid="uid://csbjg6w83ldoa" path="res://dat/icon/search.svg" id="1"]
+[ext_resource type="Texture2D" uid="uid://be6n6i2h0gn14" path="res://dat/icon/chevron.svg" id="2"]
+[ext_resource type="Texture2D" uid="uid://bf7inswvjaaxo" path="res://dat/icon/menu.svg" id="3"]
+[ext_resource type="Texture2D" uid="uid://do8bre15i1rn8" path="res://dat/icon/dropdown.svg" id="4"]
 
-[sub_resource type="GDScript" id=1]
+[sub_resource type="GDScript" id="1"]
 script/source = "extends HBoxContainer
 
 signal back_select
@@ -13,7 +13,7 @@ signal forward_select
 signal history_select
 signal path_enter(path)
 
-onready var path := $'%PathInput'
+@onready var path_input := $'%PathInput'
 
 func _on_ButtonBack_button_up() -> void:
 	emit_signal('back_select')
@@ -21,10 +21,8 @@ func _on_ButtonBack_button_up() -> void:
 func _on_ButtonForward_button_up() -> void:
 	emit_signal('forward_select')
 
-func _on_directory_changed(directory: Directory) -> void:
-	var curdir := directory.get_current_dir()
-	
-	path.text = curdir
+func _on_directory_changed(path: String) -> void:
+	path_input.text = path
 
 func _on_PathInput_text_entered(new_path):
 	emit_signal('path_enter', new_path)
@@ -34,64 +32,50 @@ func _on_ButtonHistory_button_up() -> void:
 "
 
 [node name="TitleBar" type="HBoxContainer"]
-margin_right = 1024.0
-margin_bottom = 48.0
+offset_right = 1024.0
+offset_bottom = 48.0
 size_flags_horizontal = 3
-script = SubResource( 1 )
+script = SubResource("1")
 
 [node name="LeftContainer" type="HBoxContainer" parent="."]
-margin_right = 510.0
-margin_bottom = 48.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="ButtonBack" type="TextureButton" parent="LeftContainer"]
-margin_right = 48.0
-margin_bottom = 48.0
-texture_normal = ExtResource( 2 )
+layout_mode = 2
+texture_normal = ExtResource("2")
 
 [node name="ButtonForward" type="TextureButton" parent="LeftContainer"]
-margin_left = 52.0
-margin_right = 100.0
-margin_bottom = 48.0
-texture_normal = ExtResource( 2 )
+layout_mode = 2
+texture_normal = ExtResource("2")
 flip_h = true
 
 [node name="ButtonHistory" type="TextureButton" parent="LeftContainer"]
-margin_left = 104.0
-margin_right = 152.0
-margin_bottom = 48.0
-texture_normal = ExtResource( 4 )
+layout_mode = 2
+texture_normal = ExtResource("4")
 
 [node name="PathInput" type="LineEdit" parent="LeftContainer"]
 unique_name_in_owner = true
-margin_left = 156.0
-margin_right = 510.0
-margin_bottom = 48.0
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Testing"
+placeholder_text = "Path3D"
 expand_to_text_length = true
-placeholder_text = "Path"
 
 [node name="RightContainer" type="HBoxContainer" parent="."]
-margin_left = 514.0
-margin_right = 1024.0
-margin_bottom = 48.0
+layout_mode = 2
 size_flags_horizontal = 3
 alignment = 2
 
 [node name="ButtonSearch" type="TextureButton" parent="RightContainer"]
-margin_left = 410.0
-margin_right = 458.0
-margin_bottom = 48.0
-texture_normal = ExtResource( 1 )
+layout_mode = 2
+texture_normal = ExtResource("1")
 
 [node name="ButtonMenu" type="TextureButton" parent="RightContainer"]
-margin_left = 462.0
-margin_right = 510.0
-margin_bottom = 48.0
-texture_normal = ExtResource( 3 )
+layout_mode = 2
+texture_normal = ExtResource("3")
 
 [connection signal="button_up" from="LeftContainer/ButtonBack" to="." method="_on_ButtonBack_button_up"]
 [connection signal="button_up" from="LeftContainer/ButtonForward" to="." method="_on_ButtonForward_button_up"]
 [connection signal="button_up" from="LeftContainer/ButtonHistory" to="." method="_on_ButtonHistory_button_up"]
-[connection signal="text_entered" from="LeftContainer/PathInput" to="." method="_on_PathInput_text_entered"]
+[connection signal="text_submitted" from="LeftContainer/PathInput" to="." method="_on_PathInput_text_entered"]

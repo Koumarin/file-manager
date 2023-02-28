@@ -1,17 +1,15 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=2 format=3 uid="uid://c6bs4yl6jqiju"]
 
-[sub_resource type="GDScript" id=1]
+[sub_resource type="GDScript" id="1"]
 script/source = "extends Tree
 
 signal directory_selected(path)
 
-var directory := Directory.new()
-
 func _ready() -> void:
 	var root: TreeItem
 	
-	connect('item_activated', self, '_on_item_activated')
-	connect('item_collapsed', self, '_on_item_collapsed')
+	connect('item_activated',Callable(self,'_on_item_activated'))
+	connect('item_collapsed',Callable(self,'_on_item_collapsed'))
 	
 	## Tree root.
 	set_hide_root(true)
@@ -28,7 +26,7 @@ func _ready() -> void:
 		root.set_text(0, 'Filesystem')
 		root.set_selectable(0, false)
 		
-		for i in range(directory.get_drive_count()):
+		for i in range(DirAccess.get_drive_count()):
 			var path := get_drive(i)
 			var dir  := add_directory(root, path)
 			
@@ -49,7 +47,7 @@ func update_subdirectories(root: TreeItem) -> void:
 	## If we just got here from a Tree signal, it's most likely that
 	## our tree is blocked and we can't add children, so we wait a
 	## frame until the tree unblocks.
-	yield(get_tree(), 'idle_frame')
+	await get_tree().process_frame
 	for dir in subdirs:
 		add_directory(root, dir)
 
@@ -65,7 +63,7 @@ func add_directory(root: TreeItem, path: String) -> TreeItem:
 	return null
 
 func get_drive(idx: int) -> String:
-	var path := directory.get_drive(idx)
+	var path := DirAccess.get_drive_name(idx)
 	
 	match OS.get_name():
 		'Windows': return path + '/'
@@ -80,8 +78,8 @@ func get_system_dirs() -> Array:
 			if not dirs.has(path):
 				dirs.append(path)
 	elif OS.get_name() == 'X11':
-		for i in range(directory.get_drive_count()):
-			var path := directory.get_drive(i)
+		for i in range(DirAccess.get_drive_count()):
+			var path := DirAccess.get_drive_name(i)
 			if not path == '/' and not path == '/home':
 				dirs.append(path)
 	
@@ -90,9 +88,9 @@ func get_system_dirs() -> Array:
 func cascade_tree(item: TreeItem) -> String:
 	var path = item.get_metadata(0)
 	
-	if not item.get_parent().get_metadata(0):
+	if null == item.get_parent().get_metadata(0):
 		return path
-	elif not path or path == '/':
+	elif path == '' or path == '/':
 		return ''
 	else:
 		var delim := '' if path.ends_with('/') else '/'
@@ -109,19 +107,19 @@ func _on_item_activated() -> void:
 func _on_item_collapsed (item: TreeItem) -> void:
 	if not item.collapsed and item.get_metadata(0):
 		var path: String = item.get_metadata(0)
-		var i:    TreeItem
+		var children    := item.get_children()
 		
-		i = item.get_children()
-		while i:
-			if not i.get_children():
+		children = item.get_children()
+		for i in children:
+			if not i.get_first_child():
 				update_subdirectories(i)
 			i = i.get_next()
 "
 
 [node name="FileTree" type="Tree"]
-margin_right = 253.0
-margin_bottom = 600.0
-mouse_filter = 1
+offset_right = 253.0
+offset_bottom = 600.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-script = SubResource( 1 )
+mouse_filter = 1
+script = SubResource("1")

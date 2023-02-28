@@ -1,14 +1,12 @@
 extends Node
 
-var directory := Directory.new()
-
-func get_subdirectories(path: String) -> Array:
-	var lst  := []
-	var dir  := Directory.new()
-	var file := ''
+func get_subdirectories(path: String) -> Array[String]:
+	var lst:  Array[String]
+	var dir:  DirAccess
+	var file: String
 	
-	dir.open(path)
-	dir.list_dir_begin(true, true)
+	dir = DirAccess.open(path)
+	dir.list_dir_begin() # TODOGODOT4 fill missing arguments https://github.com/godotengine/godot/pull/40547
 	file = dir.get_next()
 	while '' != file:
 		if dir.current_is_dir():
@@ -24,8 +22,8 @@ func translate_path_name(path: String) -> String:
 		home: return 'Home'
 		_:    return get_relative_path(path)
 
-func get_absolute_path(dir: Directory, path: String) -> String:
-	if path.is_rel_path():
+func get_absolute_path(dir: DirAccess, path: String) -> String:
+	if path.is_relative_path():
 		return dir.get_current_dir().trim_suffix('/') + '/' + path
 	else:
 		return path

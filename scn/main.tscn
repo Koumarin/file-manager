@@ -1,20 +1,21 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=6 format=3 uid="uid://djosjcxhep0n8"]
 
-[ext_resource path="res://scn/icon-container.tscn" type="PackedScene" id=1]
-[ext_resource path="res://scn/file-tree.tscn" type="PackedScene" id=2]
-[ext_resource path="res://scn/title-bar.tscn" type="PackedScene" id=3]
-[ext_resource path="res://dat/theme/default.tres" type="Theme" id=4]
+[ext_resource type="PackedScene" uid="uid://fhpm86itcnxn" path="res://scn/icon-container.tscn" id="1"]
+[ext_resource type="PackedScene" uid="uid://c6bs4yl6jqiju" path="res://scn/file-tree.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://dj05xf6hpqn4i" path="res://scn/title-bar.tscn" id="3"]
+[ext_resource type="Theme" path="res://dat/theme/default.tres" id="4"]
 
-[sub_resource type="GDScript" id=1]
+[sub_resource type="GDScript" id="1"]
 script/source = "extends Control
 
 signal directory_changed(directory)
 
+var directory: DirAccess
+
 var _history     := []
 var _history_idx := 0
 
-onready var directory     := Directory.new()
-onready var history_popup := $HistoryPopup
+@onready var history_popup := $HistoryPopup
 
 func _ready() -> void:
 	var init_dir: String
@@ -24,14 +25,16 @@ func _ready() -> void:
 	else:
 		init_dir = '/home/' + Util.get_username()
 	
-	if directory.open(init_dir) != OK:
-		printerr('Can\\'t open directory ', init_dir, '.')
+	directory = DirAccess.open(init_dir)
+	if not directory:
+		printerr('Can\\'t open directory ', init_dir, ':',
+				DirAccess.get_open_error())
 		return
 	
-	OS.set_window_title(Util.get_relative_path(directory.get_current_dir()))
+	get_window().set_title(Util.get_relative_path(directory.get_current_dir()))
 	_history.append(directory.get_current_dir())
 	
-	emit_signal('directory_changed', directory)
+	emit_signal('directory_changed', init_dir)
 
 func change_directory(path: String, write_history := true) -> int:
 	var status: int
@@ -45,21 +48,20 @@ func change_directory(path: String, write_history := true) -> int:
 			_history = _history.slice(0, _history_idx)
 			_history_idx += 1
 			_history.append(directory.get_current_dir())
-		OS.set_window_title(Util.get_relative_path(path))
-		emit_signal('directory_changed', directory)
+		get_window().set_title(Util.get_relative_path(path))
+		emit_signal('directory_changed', path)
 	return status
 
-func open_file(path: String, args: PoolStringArray = []) -> int:
+func open_file(path: String, args: PackedStringArray = []) -> int:
 	var status := OS.shell_open(path)
 	
 	if status != OK:
-		OS.execute(path, args, false)
+		OS.execute(path, args)
 	return status
 
 func _on_icon_opened(icon) -> void:
 	var path: String = icon.get_file_path()
-	
-	if icon.is_directory:
+	if directory.dir_exists(path):
 		change_directory(path)
 	else:
 		print(Util.get_absolute_path(directory, path))
@@ -87,6 +89,7 @@ func _on_TitleBar_path_entered(path: String):
 	change_directory(path)
 
 func _on_TitleBar_history_selected() -> void:
+	print(_history)
 	if not history_popup.visible:
 		history_popup.clear()
 		for i in range(len(_history)):
@@ -109,52 +112,45 @@ func _on_HistoryPopup_index_pressed(index: int) -> void:
 "
 
 [node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme = ExtResource( 4 )
-script = SubResource( 1 )
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("4")
+script = SubResource("1")
 
 [node name="Panel" type="Panel" parent="."]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-mouse_filter = 1
 size_flags_horizontal = 3
+mouse_filter = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="TitleBar" parent="Panel/VBoxContainer" instance=ExtResource( 3 )]
+[node name="TitleBar" parent="Panel/VBoxContainer" instance=ExtResource("3")]
+layout_mode = 2
 
 [node name="HSplitContainer" type="HSplitContainer" parent="Panel/VBoxContainer"]
-margin_top = 48.0
-margin_right = 1024.0
-margin_bottom = 600.0
-mouse_filter = 1
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 split_offset = -253
 
-[node name="FileTree" parent="Panel/VBoxContainer/HSplitContainer" instance=ExtResource( 2 )]
-margin_bottom = 552.0
+[node name="FileTree" parent="Panel/VBoxContainer/HSplitContainer" instance=ExtResource("2")]
+layout_mode = 2
 
-[node name="IconContainer" parent="Panel/VBoxContainer/HSplitContainer" instance=ExtResource( 1 )]
-anchor_right = 0.0
-anchor_bottom = 0.0
-margin_left = 265.0
-margin_right = 1024.0
-margin_bottom = 552.0
+[node name="IconContainer" parent="Panel/VBoxContainer/HSplitContainer" instance=ExtResource("1")]
+layout_mode = 2
 
 [node name="HistoryPopup" type="PopupMenu" parent="."]
-anchor_left = 0.102
-anchor_top = 0.08
-anchor_right = 0.121
-anchor_bottom = 0.113
-margin_left = -0.448006
-margin_right = 0.095993
-margin_bottom = 0.199997
 
 [connection signal="directory_changed" from="." to="Panel/VBoxContainer/TitleBar" method="_on_directory_changed"]
 [connection signal="directory_changed" from="." to="Panel/VBoxContainer/HSplitContainer/IconContainer" method="_on_directory_changed"]
