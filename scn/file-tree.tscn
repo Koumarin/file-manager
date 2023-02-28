@@ -77,7 +77,7 @@ func get_system_dirs() -> Array:
 			var path := OS.get_system_dir(i)
 			if not dirs.has(path):
 				dirs.append(path)
-	elif OS.get_name() == 'X11':
+	elif OS.get_name() == 'Linux':
 		for i in range(DirAccess.get_drive_count()):
 			var path := DirAccess.get_drive_name(i)
 			if not path == '/' and not path == '/home':
