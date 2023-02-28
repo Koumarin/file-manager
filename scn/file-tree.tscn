@@ -42,7 +42,7 @@ func _ready() -> void:
 
 func update_subdirectories(root: TreeItem) -> void:
 	var path: String = cascade_tree(root)
-	var subdirs     := Util.get_subdirectories(path)
+	var subdirs     := DirAccess.get_directories_at(path)
 	
 	## If we just got here from a Tree signal, it's most likely that
 	## our tree is blocked and we can't add children, so we wait a

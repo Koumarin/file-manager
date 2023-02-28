@@ -1,19 +1,5 @@
 extends Node
 
-func get_subdirectories(path: String) -> Array[String]:
-	var lst:  Array[String]
-	var dir:  DirAccess
-	var file: String
-	
-	dir = DirAccess.open(path)
-	dir.list_dir_begin() # TODOGODOT4 fill missing arguments https://github.com/godotengine/godot/pull/40547
-	file = dir.get_next()
-	while '' != file:
-		if dir.current_is_dir():
-			lst.append(file)
-		file = dir.get_next()
-	return lst
-
 func translate_path_name(path: String) -> String:
 	var username := get_username()
 	var home     := '/home/' + username
