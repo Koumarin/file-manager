@@ -30,11 +30,11 @@ func _gui_input(event: InputEvent) -> void:
 			emit_signal('opened', self)
 		elif not _selected and event.is_action_pressed('activate'):
 			_last_mouse_pos   = mouse_pos
-			_dragging         = true
+#			_dragging         = true
 			select()
 			emit_signal('selected', self)
 		elif event.is_action_released('activate'):
-			_dragging     = false
+#			_dragging     = false
 			position = _origin_pos
 	elif event is InputEventMouseMotion and _dragging:
 		position  += mouse_pos - _last_mouse_pos
