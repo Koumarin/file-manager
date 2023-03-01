@@ -38,6 +38,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		for from in _file_clipboard:
 			print('Pasting ', from, ' to ', to + Util.get_relative_path(from))
 			DirAccess.copy_absolute(from, to + Util.get_relative_path(from))
+			update_icons()
 
 func update_icons() -> void:
 	var files: PackedStringArray
