@@ -10,6 +10,8 @@ signal icon_selected(icon)
 
 @export var Icon: PackedScene
 
+var _file_clipboard: Array[String] = []
+
 var _selection := []
 
 var _multi_select := false
@@ -24,6 +26,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_released('toggle-hidden'):
 		_skip_hidden = not _skip_hidden
 		update_icons()
+	elif event.is_action_released('copy'):
+		if not _selection.is_empty():
+			_file_clipboard = []
+			for i in _selection:
+				var p := Util.get_absolute_path(_directory, i.get_file_path())
+				_file_clipboard.append(p)
+	elif event.is_action_released('paste'):
+		var to := _directory.get_current_dir() + '/'
+		
+		for from in _file_clipboard:
+			print('Pasting ', from, ' to ', to + Util.get_relative_path(from))
+			DirAccess.copy_absolute(from, to + Util.get_relative_path(from))
 
 func update_icons() -> void:
 	var files: PackedStringArray

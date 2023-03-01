@@ -15,7 +15,7 @@ func get_absolute_path(dir: DirAccess, path: String) -> String:
 		return path
 
 func get_relative_path(path: String) -> String:
-	path = path.get_basename().trim_suffix('/')
+	path = path.trim_suffix('/')
 	return path.substr(path.rfind('/') + 1)
 
 func get_username() -> String:
