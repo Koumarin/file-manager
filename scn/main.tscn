@@ -45,7 +45,7 @@ func change_directory(path: String, write_history := true) -> int:
 	status = directory.change_dir(path)
 	if status == OK:
 		if write_history:
-			_history = _history.slice(0, _history_idx)
+			_history = _history.slice(0, _history_idx + 1)
 			_history_idx += 1
 			_history.append(directory.get_current_dir())
 		get_window().set_title(Util.get_relative_path(path))
@@ -89,7 +89,6 @@ func _on_TitleBar_path_entered(path: String):
 	change_directory(path)
 
 func _on_TitleBar_history_selected() -> void:
-	print(_history)
 	if not history_popup.visible:
 		history_popup.clear()
 		for i in range(len(_history)):
