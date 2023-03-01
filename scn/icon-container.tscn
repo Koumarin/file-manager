@@ -21,10 +21,6 @@ var _skip_hidden := true
 @onready var icon_container := $GridContainer
 
 func _unhandled_input(event: InputEvent) -> void:
-	## Give shift-select precedence over control
-	_multi_select = event.get_action_strength('multi-select')
-	if not _multi_select:
-		_ctrl_select = event.get_action_strength('control-select')
 	if event.is_action_released('toggle-hidden'):
 		_skip_hidden = not _skip_hidden
 		update_icons()
