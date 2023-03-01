@@ -39,6 +39,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			print('Pasting ', from, ' to ', to + Util.get_relative_path(from))
 			DirAccess.copy_absolute(from, to + Util.get_relative_path(from))
 			update_icons()
+	elif event.is_action_released('delete'):
+		for i in _selection:
+			var p := Util.get_absolute_path(_directory, i.get_file_path())
+			
+			OS.move_to_trash(p)
+		_deselect_all()
+		update_icons()
 
 func update_icons() -> void:
 	var files: PackedStringArray
